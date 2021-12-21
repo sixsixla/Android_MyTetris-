@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    
+    
+    <FrameLayout
+        android:id="@+id/Gameview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingTop="20dp">
+    </FrameLayout>
+</LinearLayout>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <Button
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:id="@+id/leftMove"
+        android:text="左移">
+    </Button>
+    <Button
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:id="@+id/Rotate"
+        android:text="旋转">
+    </Button>
+    <Button
+        android:layout_width="0dp"
+        android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:id="@+id/rightMove"
+    android:text="右移">
+</Button>
+</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:id="@+id/downMove"
+            android:text="下滑">
+        </Button>
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:id="@+id/toBottom"
+            android:text="下落">
+        </Button>
+
+
+    </LinearLayout>
+    <Button
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/Pause"
+    android:text="暂停">
+</Button>
+</LinearLayout>
