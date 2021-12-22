@@ -16,6 +16,17 @@
         android:paddingLeft="10dp"
         android:paddingTop="20dp">
     </FrameLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="得分：">
+    </TextView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/score"
+        android:text="1">
+    </TextView>
 </LinearLayout>
 <LinearLayout
     android:layout_width="match_parent"
@@ -51,6 +62,13 @@
             android:layout_height="wrap_content"
             android:id="@+id/downMove"
             android:text="下滑">
+        </Button>
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:id="@+id/toFix"
+            android:text="固定">
         </Button>
         <Button
             android:layout_width="0dp"
