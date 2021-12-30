@@ -5,7 +5,7 @@
 1.0版本运行展示：
 菜单页面：
 
-<img src="C:\Users\52942\AppData\Roaming\Typora\typora-user-images\image-20211230135852033.png" alt="image-20211230135852033" style="zoom:20%;" />
+<img src="https://github.com/sixsixla/Android_mytetris/blob/master/show/Screenshot_20211230-135421.jpg" alt="image-20211230135852033" style="zoom:20%;" />
 
 有三种难度：普通（类似传统的拼图模式）困难（传统俄罗斯方块的下落加拼图）极难（在困难基础上，去掉提示背景）
 
