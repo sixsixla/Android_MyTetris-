@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">MyTetrisByMe</string>
+    <!--拼图原图资源-->
+    <string-array name="Images">
+        <item>@drawable/imagesource1</item>
+        <item>@drawable/imagesource2</item>
+        <item>@drawable/imagesource3</item>
+        <item>@drawable/imagesource4</item>
+        <item>@drawable/imagesource5</item>
+    </string-array>
 </resources>

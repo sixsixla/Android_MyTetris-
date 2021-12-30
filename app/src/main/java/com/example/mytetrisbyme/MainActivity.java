@@ -3,10 +3,13 @@ package com.example.mytetrisbyme;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -15,6 +18,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Paint boxPaint;
     //地图画笔
     Paint mapPaint;
+    //状态画笔，画暂停和游戏介绍的提示
+    Paint statePaint;
     //地图格子数
     int mapWidth = 10;
     int mapHeigh = 20;
@@ -65,32 +71,89 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //是否游戏结束
     boolean ifGameOver;
     //各个button按钮
-    Button leftMove,Rotate,rightMove,downMove,toBottom,Pause,ToFix;
-    TextView scoreView;
+    Button leftMove,Rotate,rightMove,downMove,toBottom,upMove,Pause,ToFix,reStart;
+    ImageButton backMenu;
+    TextView scoreView,mostScoreView;
 
+    ImageButton musicPlay;
+    boolean isPlaying = false;
     //开一个线程，用于方块自动下落
     public Thread downThread;
+    //音乐播放类
+    MediaMusci mediaMusci = new MediaMusci();
+    //游戏难度，默认为困难
+    String Mode = "difficulty";
+    //游戏是否通关
+    boolean ifGmaeOK = false;
+    //当前难度下的最高分
+    int Mostscore = 0;
     public Handler handler = new Handler() {
         public void handleMessage(android.os.Message message){
             view.invalidate();
+            setGmaeOver();
         };
     };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.gamemain);
+        setContentView(R.layout.gamemain2);
         leftMove = findViewById(R.id.leftMove);
         Rotate =  findViewById(R.id.Rotate);
         rightMove = findViewById(R.id.rightMove);
+        upMove = findViewById(R.id.upMove);
+
         downMove =  findViewById(R.id.downMove);
-        toBottom = findViewById(R.id.toBottom);
+//        toBottom = findViewById(R.id.toBottom);
         Pause =  findViewById(R.id.Pause);
+
         ToFix = findViewById(R.id.toFix);
         scoreView = findViewById(R.id.score);
+        musicPlay = findViewById(R.id.musicPlay);
+        reStart = findViewById(R.id.reStart);
+        backMenu = findViewById(R.id.backMenu);
+        mostScoreView = findViewById(R.id.mostscore);
         initView();
         initListener();
+        upMove.setEnabled(false);
+
+        Intent intent = getIntent();
+        Mode = intent.getStringExtra("Mode");
+        /*根据Mode设置最高分*/
+        GetMostScore(Mode);
+        if (Mode.equals("difficulty")||Mode.equals("hard")){
+            initThread();
+        }
+        else if (Mode.equals("normal")){
+            upMove.setEnabled(true);
+        }
 //        initThread();
+
+        musicPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isPlaying){
+                    isPlaying = false;
+                    mediaMusci.stopVoice();
+                    musicPlay.setBackgroundResource(R.drawable.musicoff);
+                }
+                else {
+                    isPlaying = true;
+                    mediaMusci.startVoice(MainActivity.this);
+                    musicPlay.setBackgroundResource(R.drawable.musicon);
+                }
+            }
+        });
+        musicPlay.callOnClick();
+
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        musicPlay.callOnClick();
+        mediaMusci.stopVoice();
+    }
+
     /*初始化游戏视图*/
     public void initView() {
         linePaint = new Paint();
@@ -108,6 +171,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //抗锯齿？
         mapPaint.setAntiAlias(true);
         //得到父容器
+        //状态画笔,
+
+        statePaint = new Paint();
+        statePaint.setTextSize(300);
+        statePaint.setColor(0xff000000);
+        statePaint.setAntiAlias(true);
+
         FrameLayout gameView = (FrameLayout) findViewById(R.id.Gameview);
         //实例化
         view = new View(this) {
@@ -115,8 +185,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
 
-                /*x先画底层背景*/
-                DrawBackground(canvas);
+                /*绘制底层背景*/
+                if (Mode.equals("normal")||Mode.equals("difficulty")) {
+                    DrawBackground(canvas);
+                }
 //                Toast.makeText(getContext(), "被重新绘制了", Toast.LENGTH_SHORT).show();
                 //绘制方块
 //                for (int i = 0; i < boxs.length; i++) {
@@ -132,35 +204,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 DrawBoxs(boxs, canvas);
 
                 //绘制辅助线
-                for (int x = 0; x < map.length; x++) {
-                    canvas.drawLine(x * boxSize, 0, x * boxSize, view.getHeight(), linePaint);
-                }
-                for (int y = 0; y < map[0].length; y++) {
-                    canvas.drawLine(0, y * boxSize, view.getWidth(), y * boxSize, linePaint);
-                }
+//                for (int x = 0; x < map.length; x++) {
+//                    canvas.drawLine(x * boxSize, 0, x * boxSize, view.getHeight(), linePaint);
+//                }
+//                for (int y = 0; y < map[0].length; y++) {
+//                    canvas.drawLine(0, y * boxSize, view.getWidth(), y * boxSize, linePaint);
+//                }
+                DrawLines(canvas);
 
-                /*绘制地图*/
+                /*绘制地图,即固定后不正确的块*/
                 for (int x = 0; x < map.length; x++) {
                     for (int y = 0; y < map[x].length; y++) {
                         if (map[x][y]) {
 //                            canvas.drawRect(x*boxSize,y*boxSize,x*boxSize+boxSize,y*boxSize+boxSize,mapPaint);
                             DrawUnableBoxsInMap(x, y, canvas);
+                            /*画辅助线*/
+                            DrawLines(canvas);
 
                         }
                     }
                 }
 
-                /*绘制要显示原图的块*/
+                /*绘制要显示原图的块,即正确的块*/
                 for (int x = 0; x < map.length; x++) {
                     for (int y = 0; y < map[x].length; y++) {
+                        Log.i("show","当前的x,y,boolen:"+x+y+ifShowPicture[x][y]);
                         if (ifShowPicture[x][y]) {
 //                        DrawRightPicture(x,y,canvas);
                             canvas.drawBitmap(ImagePiece.bitmapBoxs[x][y], x * boxSize, y * boxSize, new Paint());
-                            score++;
-                            scoreView.setText(Integer.toString(score));
+//                            score++;
+//                            scoreView.setText(Integer.toString(score));
                         }
                     }
                 }
+
+                /*绘制游戏暂停提示*/
+                DrawWhenPause(canvas);
+                DrawWhenGameOver(canvas);
+                DrawWhenGameOK(canvas);
             }
         };
                 /*获取屏幕大小，根据大小设置游戏区域大小*/
@@ -201,8 +282,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Rotate.setEnabled(true);
                     rightMove.setEnabled(true);
                     downMove.setEnabled(true);
-                    toBottom.setEnabled(true);
+//                    toBottom.setEnabled(true);
                     Pause.setEnabled(true);
+                    mediaMusci.resumeVoic();
+
+
                 } else {
                     ifPause = true;
                     Pause.setText("继续");
@@ -210,7 +294,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Rotate.setEnabled(false);
                     rightMove.setEnabled(false);
                     downMove.setEnabled(false);
-                    toBottom.setEnabled(false);
+//                    toBottom.setEnabled(false);
+                    mediaMusci.pauseVoic();
+                }
+            }
+            /*游戏结束时，禁用其他按钮*/
+            public void setGmaeOver(){
+                if(ifGameOver){
+
+                    Pause.setEnabled(false);
+                    leftMove.setEnabled(false);
+                    Rotate.setEnabled(false);
+                    rightMove.setEnabled(false);
+                    downMove.setEnabled(false);
+                    upMove.setEnabled(false);
+//                    toBottom.setEnabled(false);
+                    mediaMusci.stopVoice();
                 }
             }
 
@@ -253,9 +352,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Rotate.setOnClickListener(this);
                 rightMove.setOnClickListener(this);
                 downMove.setOnClickListener(this);
-                toBottom.setOnClickListener(this);
+                upMove.setOnClickListener(this);
+//                toBottom.setOnClickListener(this);
                 Pause.setOnClickListener(this);
                 ToFix.setOnClickListener(this);
+                musicPlay.setOnClickListener(this);
+                reStart.setOnClickListener(this);
+                backMenu.setOnClickListener(this);
             }
 
             public void initThread() {
@@ -299,6 +402,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                move(0,1);
                         downMove();
                         break;
+                    case R.id.upMove:
+                        move(0,-1);
+                        break;
                     case R.id.toBottom:
 //                Toast.makeText(this, "快速下落", Toast.LENGTH_SHORT).show();
                         while (true) {
@@ -314,6 +420,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         /*固定Tetris*/
                         fixAndCheckTetris();
                         Toast.makeText(this, "点了固定", Toast.LENGTH_SHORT).show();
+                        break;
+                        /*重新加载activity*/
+                    case R.id.reStart:
+                        //刷新当前activity
+                        Intent intentRe = getIntent();
+                        finish();
+                        startActivity(intentRe);
+                        break;
+                        /*返回主菜单*/
+                    case R.id.backMenu:
+                        finish();
                         break;
                 }
                 //点击按钮后，要重新绘制控件
@@ -338,7 +455,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 /*正确，不固定，修改对应块的标记*/
                 for (int i = 0; i < 4; i++) {
                     ifShowPicture[boxs[i].x][boxs[i].y] = true;
+                    /*加分*/
+                    score++;
+                    scoreView.setText(Integer.toString(score));
+                    /*设置最高分*/
+                    SetMostScore(Mode);
+
                 }
+
                 copyTetrisToMap(generatePoint);
                 return true;
             }
@@ -399,9 +523,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (move(0, 1)) {
                     return true;
                 }
-
-//        Toast.makeText(this, "新的坐标："+boxs[1].x+boxs[1].y, Toast.LENGTH_SHORT).show();
-
                 //把方块所在区域置为true
                 for (int i = 0; i < boxs.length; i++) {
                     map[boxs[i].x][boxs[i].y] = true;
@@ -410,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     withBitMap.add(new Point(coordinateTwo[i][0], coordinateTwo[i][1]));
                 }
                 //判断是否消行
-                cleanLine();
+//                cleanLine();
                 //生成新方块
 //        newTetris();
                 copyTetrisToMap(generatePoint);
@@ -433,6 +554,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Random random = new Random();
                 int indexAll = ImagePiece.TetrisList.size();
 //        Toast.makeText(this, "总共的Tetris个数"+indexAll, Toast.LENGTH_SHORT).show();
+                Log.i("index","indexALL:"+indexAll);
                 TetrisIndex = random.nextInt(indexAll);
 
                 int index = TetrisIndex;
@@ -452,6 +574,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //循环indexALL次数后，直接退出,说明当前没有能用的Tetris了，游戏通关！;
                     cycle++;
                     if (cycle == indexAll) {
+                        ifGmaeOK = true;
                         return true;
                     }
                 }
@@ -468,7 +591,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     coordinate[i][1] = ImagePiece.TetrisList.get(index)[i][1];
                     coordinateTwo[i][0] = coordinate[i][0];
                     coordinateTwo[i][1] = coordinate[i][1];
-//            Log.i("coordinateTwo","TetrisList的值"+ImagePiece.TetrisList.get(index)[i][0]+ImagePiece.TetrisList.get(index)[i][1]);
+
                 }
 //        遍历Tetris
                 for (int i = 0; i < indexAll; i++) {
@@ -477,8 +600,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
 
                 }
-//           coordinateTwo = coordinate;
-//        Toast.makeText(this, "bitmap的下标"+coordinateTwo[3][0]+coordinateTwo[3][1], Toast.LENGTH_SHORT).show();
 
                 int DeltX = coordinate[0][0] - generatePoint.x;
                 int DeltY = coordinate[0][1] - generatePoint.y;
@@ -489,14 +610,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     boxs[i].x = coordinate[i][0];
                     boxs[i].y = coordinate[i][1];
                 }
+                /*随机转一下*/
+                RotateWhenGenerate(boxs);
 
-
-//        for (int i = 0; i < 4; i++) {
-//            canvas.drawBitmap(ImagePiece.bitmapBoxs[coordinateTwo[i][0]][coordinateTwo[i][1]],boxs[i].x*boxSize,boxs[i].y*boxSize,new Paint());
-////            canvas.drawBitmap(ImagePiece.bitmapBoxs[coordinateTwo[i][0]][coordinateTwo[i][1]], coordinate[i][0]*boxSize,coordinate[i][1]*boxSize,new Paint());
-//        }
                 return false;
 
+            }
+            /*将生成的块随机选择几次，增加难度和随机性*/
+    public void RotateWhenGenerate(Point[] boxs){
+        Random random = new Random();
+        int num = random.nextInt(4);
+        for (int j = 0; j < num; j++) {
+            for (int i = 0; i < 4; i++) {
+                //顺时针旋转90°
+                int rotateX = -boxs[i].y + boxs[0].y + boxs[0].x;
+                int rotateY = boxs[i].x - boxs[0].x + boxs[0].y;
+                boxs[i].x = rotateX;
+                boxs[i].y = rotateY;
+            }
+        }
+
+    }
+            /*获取当前难度下的最高分*/
+    public void GetMostScore(String Mode){
+        SharedPreferences myPreferences = getSharedPreferences("MostScore", MODE_PRIVATE);
+         Mostscore = myPreferences.getInt(Mode , 0);
+         mostScoreView.setText(Integer.toString(Mostscore));
+    }
+    /*如果最高分刷新了，要重新写入*/
+    public void SetMostScore(String Mode){
+        if (score > Mostscore){
+            Mostscore = score;
+            SharedPreferences sharedPreferences = getSharedPreferences("MostScore", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(Mode,Mostscore );
+            editor.commit();
+            mostScoreView.setText(Integer.toString(Mostscore));
+        }
+    }
+
+            /*绘制辅助线*/
+            public void DrawLines(Canvas canvas){
+                //绘制辅助线
+                for (int x = 0; x < map.length; x++) {
+                    canvas.drawLine(x * boxSize, 0, x * boxSize, view.getHeight(), linePaint);
+                }
+                for (int y = 0; y < map[0].length; y++) {
+                    canvas.drawLine(0, y * boxSize, view.getWidth(), y * boxSize, linePaint);
+                }
             }
 
             /*绘制地图中的Tetris*/
@@ -512,7 +673,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             /*绘制底层背景*/
             public void DrawBackground(Canvas canvas) {
                 Paint paint = new Paint();
-                paint.setAlpha(125);
+                paint.setAlpha(70);
                 canvas.drawBitmap(ImagePiece.sourceBitmap, 0, 0, paint);
             }
 
@@ -526,50 +687,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 int bitmapX = withBitMap.get(index).x;
                 int bitmapY = withBitMap.get(index).y;
-                canvas.drawBitmap(ImagePiece.bitmapBoxs[bitmapX][bitmapY], x * boxSize, y * boxSize, new Paint());
+//                Paint paint = new Paint();
+//                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                canvas.drawBitmap(ImagePiece.bitmapBoxs[bitmapX][bitmapY], x * boxSize, y * boxSize,new Paint());
             }
 
-            /*创建一个新的方块*/
-            public void newTetris() {
-                Random random = new Random();
-                boxType = random.nextInt(7);
-                switch (boxType) {
-                    //方块形状
-                    case 0:
-                        boxs = new Point[]{new Point(4, 1), new Point(4, 0), new Point(3, 0), new Point(3, 1)};
-//                Toast.makeText(this, "方块行", Toast.LENGTH_SHORT).show();
-                        break;
-                    //L形状
-                    case 1:
-                        boxs = new Point[]{new Point(4, 1), new Point(3, 0), new Point(3, 1), new Point(5, 1)};
-//                Toast.makeText(this, "L形状", Toast.LENGTH_SHORT).show();
-                        break;
-                    //反L
-                    case 2:
-                        boxs = new Point[]{new Point(4, 1), new Point(5, 0), new Point(3, 1), new Point(5, 1)};
-//                Toast.makeText(this, "反L形状", Toast.LENGTH_SHORT).show();
-                        break;
-                    //楼梯形状
-                    case 3:
-                        boxs = new Point[]{new Point(4, 1), new Point(5, 1), new Point(3, 0), new Point(4, 0)};
-//                Toast.makeText(this, "楼梯形状", Toast.LENGTH_SHORT).show();
-                        break;
-                    //反楼梯形状
-                    case 4:
-                        boxs = new Point[]{new Point(4, 1), new Point(4, 0), new Point(5, 0), new Point(3, 1)};
-//                Toast.makeText(this, "反楼梯形状", Toast.LENGTH_SHORT).show();
-                        break;
-                    //长条形
-                    case 5:
-                        boxs = new Point[]{new Point(4, 0), new Point(3, 0), new Point(5, 0), new Point(6, 0)};
-//                Toast.makeText(this, "长条形状", Toast.LENGTH_SHORT).show();
-                        break;
-                    //山字形状
-                    case 6:
-                        boxs = new Point[]{new Point(4, 1), new Point(3, 1), new Point(5, 1), new Point(4, 0)};
-//                Toast.makeText(this, "山字形状", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
+            /*绘制游戏暂停提示*/
+           public void DrawWhenPause(Canvas canvas){
+              statePaint.setColor(0xFF27D600);
+
+               if(ifPause)
+                   canvas.drawText("暂停",viewWidth/2-statePaint.measureText("暂停")/2,viewHeight/2,statePaint);
+           }
+
+           /*绘制游戏结束提示*/
+           public void DrawWhenGameOver(Canvas canvas){
+               statePaint.setTextSize(200);
+               statePaint.setColor(0xFF254900);
+               if(ifGameOver)
+                   canvas.drawText("游戏结束",viewWidth/2-statePaint.measureText("游戏结束")/2,viewHeight/2,statePaint);
+           }
+           /*绘制游戏通关*/
+    public void DrawWhenGameOK(Canvas canvas){
+
+        if(ifGmaeOK) {
+            statePaint.setTextSize(200);
+            statePaint.setColor(0x3C00FF00);
+            canvas.drawText("恭喜通关！", viewWidth / 2 - statePaint.measureText("恭喜通关！") / 2, viewHeight / 2, statePaint);
+        }
+    }
+
 
     }
