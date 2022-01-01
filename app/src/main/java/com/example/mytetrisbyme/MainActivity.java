@@ -126,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else if (Mode.equals("normal")){
             upMove.setEnabled(true);
         }
-//        initThread();
 
         musicPlay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onPause() {
         super.onPause();
-//        musicPlay.callOnClick();
         mediaMusci.stopVoice();
     }
 
@@ -172,7 +170,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mapPaint.setAntiAlias(true);
         //得到父容器
         //状态画笔,
-
         statePaint = new Paint();
         statePaint.setTextSize(300);
         statePaint.setColor(0xff000000);
@@ -184,60 +181,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             protected void onDraw(Canvas canvas) {
                 super.onDraw(canvas);
-
                 /*绘制底层背景*/
                 if (Mode.equals("normal")||Mode.equals("difficulty")) {
                     DrawBackground(canvas);
                 }
-//                Toast.makeText(getContext(), "被重新绘制了", Toast.LENGTH_SHORT).show();
-                //绘制方块
-//                for (int i = 0; i < boxs.length; i++) {
-//                    canvas.drawRect(
-//                            boxs[i].x*boxSize,
-//                            boxs[i].y*boxSize,
-//                            boxs[i].x*boxSize+boxSize,
-//                            boxs[i].y*boxSize+boxSize,
-//                            boxPaint);
-//                }
-                //绘制方块
-//                copyTetrisToMap(generatePoint);
                 DrawBoxs(boxs, canvas);
-
-                //绘制辅助线
-//                for (int x = 0; x < map.length; x++) {
-//                    canvas.drawLine(x * boxSize, 0, x * boxSize, view.getHeight(), linePaint);
-//                }
-//                for (int y = 0; y < map[0].length; y++) {
-//                    canvas.drawLine(0, y * boxSize, view.getWidth(), y * boxSize, linePaint);
-//                }
                 DrawLines(canvas);
 
                 /*绘制地图,即固定后不正确的块*/
                 for (int x = 0; x < map.length; x++) {
                     for (int y = 0; y < map[x].length; y++) {
                         if (map[x][y]) {
-//                            canvas.drawRect(x*boxSize,y*boxSize,x*boxSize+boxSize,y*boxSize+boxSize,mapPaint);
                             DrawUnableBoxsInMap(x, y, canvas);
                             /*画辅助线*/
                             DrawLines(canvas);
-
                         }
                     }
                 }
-
                 /*绘制要显示原图的块,即正确的块*/
                 for (int x = 0; x < map.length; x++) {
                     for (int y = 0; y < map[x].length; y++) {
                         Log.i("show","当前的x,y,boolen:"+x+y+ifShowPicture[x][y]);
                         if (ifShowPicture[x][y]) {
-//                        DrawRightPicture(x,y,canvas);
                             canvas.drawBitmap(ImagePiece.bitmapBoxs[x][y], x * boxSize, y * boxSize, new Paint());
-//                            score++;
-//                            scoreView.setText(Integer.toString(score));
                         }
                     }
                 }
-
                 /*绘制游戏暂停提示*/
                 DrawWhenPause(canvas);
                 DrawWhenGameOver(canvas);
@@ -533,11 +502,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //判断是否消行
 //                cleanLine();
                 //生成新方块
-//        newTetris();
                 copyTetrisToMap(generatePoint);
-
-                //重新刷新控件
-//        view.invalidate();
                 //判断游戏是否结束
                 ifGameOver = checkIfGameOver();
                 return false;
@@ -553,7 +518,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public boolean copyTetrisToMap(Point generatePoint) {
                 Random random = new Random();
                 int indexAll = ImagePiece.TetrisList.size();
-//        Toast.makeText(this, "总共的Tetris个数"+indexAll, Toast.LENGTH_SHORT).show();
                 Log.i("index","indexALL:"+indexAll);
                 TetrisIndex = random.nextInt(indexAll);
 
@@ -578,13 +542,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         return true;
                     }
                 }
-//        Toast.makeText(this, "选择的Tetris是"+index, Toast.LENGTH_SHORT).show();
-
-                Log.i("coordinateTwo", "当前index是" + index);
-
-//          int[][] coordinate = ImagePiece.TetrisList.get(index);
                 int[][] coordinate = new int[][]{new int[]{0, 1}, new int[]{0, 1}, new int[]{0, 1}, new int[]{0, 1}};
-//             数组直接相等是无效的啊
                 Log.i("num", "当前Tetris数:" + index);
                 for (int i = 0; i < 4; i++) {
                     coordinate[i][0] = ImagePiece.TetrisList.get(index)[i][0];
@@ -593,14 +551,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     coordinateTwo[i][1] = coordinate[i][1];
 
                 }
-//        遍历Tetris
-                for (int i = 0; i < indexAll; i++) {
-                    for (int j = 0; j < 4; j++) {
-                        Log.i("coordinateTwo", "TetrisList的所有值,当前+" + i + ":" + ImagePiece.TetrisList.get(i)[j][0] + ImagePiece.TetrisList.get(i)[j][1]);
-                    }
-
-                }
-
                 int DeltX = coordinate[0][0] - generatePoint.x;
                 int DeltY = coordinate[0][1] - generatePoint.y;
                 //将Tetris的坐标平移到地图中待生成的位置
@@ -612,9 +562,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 /*随机转一下*/
                 RotateWhenGenerate(boxs);
-
                 return false;
-
             }
             /*将生成的块随机选择几次，增加难度和随机性*/
     public void RotateWhenGenerate(Point[] boxs){
@@ -667,7 +615,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     canvas.drawBitmap(ImagePiece.bitmapBoxs[coordinateTwo[i][0]][coordinateTwo[i][1]], boxs[i].x * boxSize, boxs[i].y * boxSize, new Paint());
                     Log.i("coordinateTwo", "draw时的coordinateTWO" + coordinateTwo[i][0] + coordinateTwo[i][1]);
                 }
-//        Toast.makeText(this, "bitmap的下标"+coordinateTwo[3][0]+coordinateTwo[3][1], Toast.LENGTH_SHORT).show();
             }
 
             /*绘制底层背景*/
@@ -687,8 +634,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 int bitmapX = withBitMap.get(index).x;
                 int bitmapY = withBitMap.get(index).y;
-//                Paint paint = new Paint();
-//                paint.setStyle(Paint.Style.FILL_AND_STROKE);
                 canvas.drawBitmap(ImagePiece.bitmapBoxs[bitmapX][bitmapY], x * boxSize, y * boxSize,new Paint());
             }
 
@@ -708,7 +653,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                    canvas.drawText("游戏结束",viewWidth/2-statePaint.measureText("游戏结束")/2,viewHeight/2,statePaint);
            }
            /*绘制游戏通关*/
-    public void DrawWhenGameOK(Canvas canvas){
+          public void DrawWhenGameOK(Canvas canvas){
 
         if(ifGmaeOK) {
             statePaint.setTextSize(200);
