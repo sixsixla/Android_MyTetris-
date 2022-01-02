@@ -4,6 +4,7 @@
 
 1.0版本运行展示：
 1.1版本，新增上传图片功能，玩家能上传本地图片作为拼图背景
+2.0.0版本：生成apk文件，喜欢的朋友可以下载游玩，但需要在打开前手动给权限，因为没有写动态权限申请（等有空了完善一下）
 菜单页面：
 
 <img src="https://github.com/sixsixla/Android_mytetris/blob/master/show/Screenshot_20211230-135421.jpg" alt="image-20211230135852033" style="zoom:25%;" />
