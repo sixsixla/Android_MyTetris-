@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/textscore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="得分：">
+
+    </TextView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/score"
+        android:layout_toRightOf="@+id/textscore"
+        android:layout_alignBottom="@+id/textscore"
+        android:text="0">
+    </TextView>
+
+    <TextView
+        android:id="@+id/textmoestscore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textscore"
+        android:text="历史最高分：">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/morestscore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       android:layout_toRightOf="@+id/textmoestscore"
+        android:layout_alignBottom="@+id/textmoestscore"
+        android:text="0">
+    </TextView>
+
+    <TextView
+        android:id="@+id/one"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/box1"
+        android:gravity="center"
+        android:text="俄"
+        android:textSize="30dp"></TextView>
+
+    <TextView
+        android:id="@+id/two"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/one"
+        android:layout_centerInParent="true"
+        android:background="@drawable/box2"
+        android:gravity="center"
+        android:text="罗"
+        android:textSize="30dp">
+    </TextView>
+    <TextView
+        android:id="@+id/three"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:background="@drawable/box3"
+        android:layout_below="@+id/two"
+        android:text="斯"
+        android:layout_centerInParent="true"
+        android:textSize="30dp">
+    </TextView>
+
+    <TextView
+        android:id="@+id/four"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:background="@drawable/box4"
+        android:layout_alignBottom="@+id/three"
+        android:layout_centerInParent="true"
+        android:layout_toLeftOf="@+id/three"
+        android:text="拼"
+        android:textStyle="bold"
+        android:textSize="30dp">
+    </TextView>
+    <TextView
+        android:id="@+id/five"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:background="@drawable/box5"
+        android:layout_toRightOf="@+id/three"
+        android:layout_alignBottom="@+id/three"
+        android:text="图"
+        android:textStyle="bold"
+        android:textSize="30dp">
+    </TextView>
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/three">
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:background="@drawable/box3"
+        android:textSize="35dp"
+        android:text="挑">
+    </TextView>
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:background="@drawable/box1"
+        android:textSize="35dp"
+        android:text="战">
+    </TextView>
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:background="@drawable/box4"
+        android:textSize="35dp"
+        android:text="不">
+    </TextView>
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:background="@drawable/box5"
+        android:textSize="35dp"
+        android:text="可">
+    </TextView>
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:background="@drawable/box2"
+        android:textSize="35dp"
+        android:text="能">
+    </TextView>
+</LinearLayout>
+</RelativeLayout>
