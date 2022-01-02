@@ -3,6 +3,7 @@
 初步想法是用俄罗斯方块的形式做一个拼图游戏，把每个块固定在正确的位置时能得分。
 
 1.0版本运行展示：
+1.1版本，新增上传图片功能，玩家能上传本地图片作为拼图背景
 菜单页面：
 
 <img src="https://github.com/sixsixla/Android_mytetris/blob/master/show/Screenshot_20211230-135421.jpg" alt="image-20211230135852033" style="zoom:25%;" />
